@@ -1,6 +1,3 @@
-
-let zoom = 10;
-
 board.hexes.forEach(hex => {
   resources.sort(() => Math.random() - 0.5);
   hex.resource = resources.pop();
@@ -10,58 +7,158 @@ board.hexes.forEach(hex => {
   hex.roll = rolls.pop();
 });
 
-
-
 // ---------------------------
 
 function setup() {
-  colors.desert = color(255, 238, 160);
-  colors.wood = color(44, 94, 69);
-  colors.brick = color(185, 105, 68);
-  colors.wheat = color(255, 238, 0);
-  colors.sheep = color(125, 214, 73);
-  colors.ore = color(111, 114, 134);
-  colors.player1 = color(224, 26, 26);
-  colors.player2 = color(247, 151, 8);
-  colors.player3 = color(255, 255, 255);
-  colors.player4 = color(31, 84, 255);
-  
-  createCanvas(innerWidth, innerHeight);
+  setColors();
+
+  createCanvas(innerWidth, innerHeight, WEBGL);
   background(0);
 
-  translate(width / 2, height / 2);
+  translate(0, -zoom * 5, 0);
+
   scale(zoom);
+
+  rotateX(PI / 3);
+
+  ambientLight(255);
+  ambientMaterial(255);
+  sphere(0);
+
+  pointLight(255, 255, 255, 0, 0, 0);
 
   board.hexes.forEach(hex => {
     const c = colors[hex.resource];
-    fill(c);
-    strokeWeight(0.1);
-    beginShape();
-    vertex(hex.x, hex.y - 7);
-    vertex(hex.x + 6, hex.y - 3);
-    vertex(hex.x + 6, hex.y + 3);
-    vertex(hex.x, hex.y + 7);
-    vertex(hex.x - 6, hex.y + 3);
-    vertex(hex.x - 6, hex.y - 3);
-    endShape(CLOSE);
-    fill(brightness(colors[hex.resource]) > 80 ? 0 : 255);
-    textAlign(CENTER, CENTER);
-    textSize(4);
-    text(hex.roll, hex.x, hex.y);
+    ambientMaterial(c);
+    noStroke();
+
+    // beginShape();
+    // for (let i = 0; i < 6; ++i) {
+    //   vertex(
+    //     hex.x() + cos((PI / 3) * i + PI / 2) * hexRadius,
+    //     hex.y() + sin((PI / 3) * i + PI / 2) * hexRadius,
+    //     0
+    //   );
+    // }
+    // endShape(CLOSE);
+
+    stroke(255);
+
+    function subdivide(divisions, x, y, angle, radius, division) {
+      if (!division) division = 1;
+      // console.log(division)
+      if (division >= divisions) {
+        beginShape();
+        // console.log("x: " + x, "y: " + y);
+        vertex(x, y);
+        vertex(
+          x + (cos(angle + (2 * PI) / 3) * radius) / 2,
+          y + (sin(angle + (2 * PI) / 3) * radius) / 2
+        );
+        vertex(
+          x + (cos(angle + PI / 3) * radius) / 2,
+          y + (sin(angle + PI / 3) * radius) / 2
+        );
+        endShape();
+
+        beginShape();
+        vertex(
+          x + (cos(angle + (2 * PI) / 3) * radius) / 2,
+          y + (sin(angle + (2 * PI) / 3) * radius) / 2
+        );
+        vertex(
+          x + cos(angle + (2 * PI) / 3) * radius,
+          y + sin(angle + (2 * PI) / 3) * radius
+        );
+        vertex(
+          x +
+            (cos(angle + (2 * PI) / 3) * radius) / 2 +
+            (cos(angle + PI / 3) * radius) / 2,
+          y +
+            (sin(angle + (2 * PI) / 3) * radius) / 2 +
+            (sin(angle + PI / 3) * radius) / 2
+        );
+        endShape();
+
+        beginShape();
+        vertex(
+          x + (cos(angle + (2 * PI) / 3) * radius) / 2,
+          y + (sin(angle + (2 * PI) / 3) * radius) / 2
+        );
+        vertex(
+          x +
+            (cos(angle + (2 * PI) / 3) * radius) / 2 +
+            (cos(angle + PI / 3) * radius) / 2,
+          y +
+            (sin(angle + (2 * PI) / 3) * radius) / 2 +
+            (sin(angle + PI / 3) * radius) / 2
+        );
+        vertex(
+          x + (cos(angle + PI / 3) * radius) / 2,
+          y + (sin(angle + PI / 3) * radius) / 2
+        );
+        endShape();
+
+        beginShape();
+        vertex(
+          x +
+            (cos(angle + (2 * PI) / 3) * radius) / 2 +
+            (cos(angle + PI / 3) * radius) / 2,
+          y +
+            (sin(angle + (2 * PI) / 3) * radius) / 2 +
+            (sin(angle + PI / 3) * radius) / 2
+        );
+        vertex(
+          x + (cos(angle + PI / 3) * radius) / 2,
+          y + (sin(angle + PI / 3) * radius) / 2
+        );
+        vertex(
+          x + cos(angle + PI / 3) * radius,
+          y + sin(angle + PI / 3) * radius
+        );
+        endShape();
+        return;
+      }
+      subdivide(divisions, x, y, angle, radius / 2, division + 1);
+      subdivide(
+        divisions,
+        x + (cos(angle + (2 * PI) / 3) * radius) / 2,
+        y + (sin(angle + (2 * PI) / 3) * radius) / 2,
+        angle,
+        radius / 2,
+        division + 1
+      );
+      subdivide(
+        divisions,
+        x + (cos(angle + PI / 3) * radius) / 2,
+        y + (sin(angle + PI / 3) * radius) / 2,
+        angle,
+        radius / 2,
+        division + 1
+      );
+      subdivide(
+        divisions,
+        x +
+          (cos(angle + (2 * PI) / 3) * radius) / 2 +
+          (cos(angle + PI / 3) * -radius) / 2,
+        y +
+          (sin(angle + (2 * PI) / 3) * radius) / 2 +
+          (sin(angle + PI / 3) * -radius) / 2,
+        angle,
+        radius / 2,
+        division + 1
+      );
+    }
+
+    for (let a = 0; a < TWO_PI; a += PI / 3) {
+      subdivide(3, hex.x(), hex.y(), a + PI / 2, hexRadius);
+    }
   });
-};
 
-function draw() {};
-
-
+  const gaussian = makeGaussian(1, 0, 0, 1, 1);
+  for (let i = -4; i < 4; i += 0.5) console.log(gaussian(i, 0));
+}
 
 // ---------------------------
 
-function keyPressed() {
-  console.log(keyCode === 32)
-  switch(keyCode) {
-    case 32: // space 
-      console.log()
-      break;
-  }
-}
+function draw() {}
