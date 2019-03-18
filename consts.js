@@ -151,14 +151,116 @@ board.hexes.forEach((hex, hi) => {
       r: 1
     }
   ];
-  for (const triangle of hex.surface) {
-    // triangle.subds = [
-    //   {
-    //     a: 
-    //   }
-    // ]
-  }
 });
+
+function subdivide(hex, divisions, x, y, angle, radius, division) {
+  if (!division) division = 1;
+
+  if (division < divisions) {
+    subdivide(hex, divisions, x, y, angle, radius / 2, division + 1);
+    subdivide(hex,
+      divisions,
+      x + (cos(angle + (2 * Math.PI) / 3) * radius) / 2,
+      y + (sin(angle + (2 * Math.PI) / 3) * radius) / 2,
+      angle,
+      radius / 2,
+      division + 1
+    );
+    subdivide(hex, 
+      divisions,
+      x + (cos(angle + Math.PI / 3) * radius) / 2,
+      y + (sin(angle + Math.PI / 3) * radius) / 2,
+      angle,
+      radius / 2,
+      division + 1
+    );
+    subdivide(hex,
+      divisions,
+      x +
+        (cos(angle + (2 * Math.PI) / 3) * radius) / 2 +
+        (cos(angle + Math.PI / 3) * -radius) / 2,
+      y +
+        (sin(angle + (2 * Math.PI) / 3) * radius) / 2 +
+        (sin(angle + Math.PI / 3) * -radius) / 2,
+      angle,
+      radius / 2,
+      division + 1
+    );
+    return;
+  }
+
+  let vertx, verty;
+  function vertz() {
+    return gaussian(sqrt(pow(vertx - hex.x(), 2) + pow(verty - hex.y(), 2)), 0) * noise(vertx, verty);
+    // return sqrt(pow(vertx - hex.x(), 2) + pow(verty - hex.y(), 2));
+  }
+
+  beginShape();
+  vertx = x;
+  verty = y;
+  vertex(vertx, verty, vertz());
+  vertx = x + (cos(angle + (2 * Math.PI) / 3) * radius) / 2;
+  verty = y + (sin(angle + (2 * Math.PI) / 3) * radius) / 2;
+  vertex(vertx, verty, vertz());
+  vertx = x + (cos(angle + Math.PI / 3) * radius) / 2;
+  verty = y + (sin(angle + Math.PI / 3) * radius) / 2;
+  vertex(vertx, verty, vertz());
+  endShape();
+
+  beginShape();
+  vertx = x + (cos(angle + (2 * Math.PI) / 3) * radius) / 2;
+  verty = y + (sin(angle + (2 * Math.PI) / 3) * radius) / 2;
+  vertex(vertx, verty, vertz());
+  vertx = x + cos(angle + (2 * Math.PI) / 3) * radius;
+  verty = y + sin(angle + (2 * Math.PI) / 3) * radius;
+  vertex(vertx, verty, vertz());
+  vertx =
+    x +
+    (cos(angle + (2 * Math.PI) / 3) * radius) / 2 +
+    (cos(angle + Math.PI / 3) * radius) / 2;
+  verty =
+    y +
+    (sin(angle + (2 * Math.PI) / 3) * radius) / 2 +
+    (sin(angle + Math.PI / 3) * radius) / 2;
+  vertex(vertx, verty, vertz());
+  endShape();
+
+  beginShape();
+  vertx = x + (cos(angle + (2 * Math.PI) / 3) * radius) / 2;
+  verty = y + (sin(angle + (2 * Math.PI) / 3) * radius) / 2;
+  vertex(vertx, verty, vertz());
+  vertx =
+    x +
+    (cos(angle + (2 * Math.PI) / 3) * radius) / 2 +
+    (cos(angle + Math.PI / 3) * radius) / 2;
+  verty =
+    y +
+    (sin(angle + (2 * Math.PI) / 3) * radius) / 2 +
+    (sin(angle + Math.PI / 3) * radius) / 2;
+  vertex(vertx, verty, vertz());
+  vertx = x + (cos(angle + Math.PI / 3) * radius) / 2;
+  verty = y + (sin(angle + Math.PI / 3) * radius) / 2;
+  vertex(vertx, verty, vertz());
+  endShape();
+
+  beginShape();
+  vertx =
+    x +
+    (cos(angle + (2 * Math.PI) / 3) * radius) / 2 +
+    (cos(angle + Math.PI / 3) * radius) / 2;
+  verty =
+    y +
+    (sin(angle + (2 * Math.PI) / 3) * radius) / 2 +
+    (sin(angle + Math.PI / 3) * radius) / 2;
+  vertex(vertx, verty, vertz());
+  vertx = x + (cos(angle + Math.PI / 3) * radius) / 2;
+  verty = y + (sin(angle + Math.PI / 3) * radius) / 2;
+  vertex(vertx, verty, vertz());
+  vertx = x + cos(angle + Math.PI / 3) * radius;
+  verty = y + sin(angle + Math.PI / 3) * radius;
+  vertex(vertx, verty, vertz());
+  endShape();
+}
 
 
 // --------------------------------------------------------
